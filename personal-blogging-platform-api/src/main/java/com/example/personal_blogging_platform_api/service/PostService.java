@@ -40,9 +40,8 @@ public class PostService {
 
     // Get article based on article ID
     public BlogPost findPostById(String postId){
-        return blogPostRepository.findById(postId).orElseThrow(()-> new PostNotFoundException("post not found with postID : "+postId));
+        return blogPostRepository.findById(postId).orElseThrow(()-> new PostNotFoundException("Post not found with postID : "+postId));
     }
-
 
     // Update the article based on article ID
     public BlogPost updateArticle(BlogPost updatePost,String postId){
@@ -57,7 +56,9 @@ public class PostService {
 
     // Delete an article based on article ID
     public void deleteArticle(String postId){
-        blogPostRepository.deleteById(postId);
+        if(blogPostRepository.existsById(postId))
+            blogPostRepository.deleteById(postId);
+        else throw new PostNotFoundException("Post not found with post ID: "+ postId);
     }
 
     public Page<PostPreviewDto> findAllPosts(int page, int size) {
@@ -66,6 +67,11 @@ public class PostService {
     }
 
     public BlogPost createPost(BlogPost post) {
+        /*TODO
+        *  Add the validation for the necessary fields like title, author
+        * Add logic to add created at, published at, and updated at time
+        *
+        * */
         return blogPostRepository.save(post);
     }
 }
