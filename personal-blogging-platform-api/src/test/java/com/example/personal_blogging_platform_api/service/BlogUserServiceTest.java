@@ -1,28 +1,34 @@
-package com.example.personal_blogging_platform_api;
+package com.example.personal_blogging_platform_api.service;
 
+import com.example.personal_blogging_platform_api.dto.PostPreviewDto;
 import com.example.personal_blogging_platform_api.exception.PostNotFoundException;
 import com.example.personal_blogging_platform_api.model.BlogPost;
 import com.example.personal_blogging_platform_api.model.BlogUser;
 import com.example.personal_blogging_platform_api.repository.BlogPostRepository;
 
-import com.example.personal_blogging_platform_api.service.PostService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class BlogUserServiceTest {
 
-    @Autowired
+    @InjectMocks
     private PostService postService;
 
-    @MockitoBean
+    @Mock
     private BlogPostRepository postRepo;
 
     @Test
@@ -217,7 +223,23 @@ public class BlogUserServiceTest {
         // assert the result and interaction
         assertEquals(Collections.EMPTY_LIST,result);
         verify(postRepo,times(1)).findPostPreviewsByTag(tag);
+    }
+    @Test
+    void findAllPosts_WhenCalledWithValidPageAndSize_ReturnsPageFromRepository() {
+        // Given
+        int page = 0;
+        int size = 10;
+        PageRequest expectedPageRequest = PageRequest.of(page, size);
+        Page<PostPreviewDto> expectedPage = new PageImpl<>(Collections.emptyList());
 
+        when(postRepo.findPostPreviews(expectedPageRequest)).thenReturn(expectedPage);
+
+        // When
+        Page<PostPreviewDto> result = postService.findAllPosts(page, size);
+
+        // Then
+        verify(postRepo).findPostPreviews(expectedPageRequest);
+        assertThat(result).isSameAs(expectedPage);
     }
 
 }
